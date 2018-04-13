@@ -243,6 +243,9 @@ class Centre {
       
       ellipse(petalPoints[i][0], petalPoints[i][1], i,i);
 
+      line(x1,y1,petalPoints[i][0],petalPoints[i][1]);
+      line(x2,y2,petalPoints[i][0],petalPoints[i][1]);
+
     }
     
     x1 = coords[i-1][0];
@@ -253,6 +256,9 @@ class Centre {
       
     line(x1,y1,x2,y2);
     ellipse(petalPoints[i][0], petalPoints[i][1], 1,2);
+    
+    line(x1,y1,petalPoints[i][0],petalPoints[i][1]);
+    line(x2,y2,petalPoints[i][0],petalPoints[i][1]);
 
 
   }
