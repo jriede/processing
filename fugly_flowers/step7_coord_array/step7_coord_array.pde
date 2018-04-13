@@ -184,12 +184,12 @@ class Centre {
     }
     
     this.setCoords(coords);
-    this.makePetals(coords);
+    this.makePetals(coords, corners);
 
 
   }
   
-  void makePetals(float[][] coords) {
+  void makePetals(float[][] coords, int corners) {
     println("coords lenght: ",coords.length);
 
     float[] temp;
@@ -202,8 +202,9 @@ class Centre {
     petalPoints[0][0] = temp[0];
     petalPoints[0][1] = temp[1];
     
-    for (int i = 1; i < coords.length-1; i++) {
+    for (int i = 1; i < corners; i++) {
       println(i);
+      println(coords[i][0], coords[i][1], coords[0][0], coords[0][1]);
       pet = new Petal(coords[i-1][0], coords[i-1][1], coords[i][0], coords[i][1]);
       temp = pet.getTip();
       println(temp[0]);
@@ -211,7 +212,8 @@ class Centre {
       petalPoints[i][1] = temp[1];
     }
     println(i);
-    pet = new Petal(coords[i][0], coords[i][1], coords[0][0], coords[0][1]);
+    println(coords[i-1][0], coords[i-1][1], coords[0][0], coords[0][1]);
+    pet = new Petal(coords[i-1][0], coords[i-1][1], coords[0][0], coords[0][1]);
     
     temp = pet.getTip();
     println("last one: ", temp[0]);
@@ -243,13 +245,13 @@ class Centre {
 
     }
     
-    x1 = coords[i][0];
-    y1 = coords[i][1];
+    x1 = coords[i-1][0];
+    y1 = coords[i-1][1];
 
     x2 = coords[0][0];
     y2 = coords[0][1];
       
-    //line(x1,y1,x2,y2);
+    line(x1,y1,x2,y2);
     ellipse(petalPoints[i][0], petalPoints[i][1], 1,2);
 
 
