@@ -1,5 +1,7 @@
 
 Flower[] flowers;
+
+
 int corners_min = 5;
 int corners_max = 8;
 
@@ -129,9 +131,12 @@ class Centre {
   float x,y,r;
   int corners;
   float[][] coords;
+  float[][] cp;
   float rmin;
   float rmax;
-  int i;
+  int i,red,green,blue;
+  color clr;
+  int alph;
   float angle = 0;
   float angle2 = 0;
   float xtemp,ytemp;
@@ -150,10 +155,17 @@ class Centre {
     stemlen = len;
     rmin = 0.05*stemlen;
     rmax = 0.25*stemlen;
+    
+    red = int(random(255));
+    green = int(random(255));
+    blue = int(random(255));
+    clr = color(red, green, blue);
+    alph = int(random(255));
 
     r = random(rmin, rmax);
     corners = int(random(corners_min,corners_max));
     coords = new float[corners+1][2];
+    cp = new float[corners+1][4];
 
 
     // generate corner coordinates
@@ -185,40 +197,91 @@ class Centre {
     
     this.setCoords(coords);
     this.makePetals(coords, corners);
+    this.setControlPoints(coords);
+    
+    noStroke();
+    fill(clr, alph);
+    float rr = random(rmin,rmax);
+    ellipse(x,y, rr,rr);
 
 
   }
   
+  void setControlPoints(float[][] coords) {
+    VOps vops = new VOps(); // vector operations
+    float[] n;
+    float dz;
+    
+    for (i=0; i<coords.length-2;i++) {
+      dz = vops.distance(coords[i][0], coords[i][1], coords[i+1][0], coords[i+1][1])*0.2;
+      n = vops.normal(coords[i][0], coords[i][1], coords[i+1][0], coords[i+1][1]);
+      
+      cp[i][0] = coords[i][0] + dz*n[0];
+      cp[i][1] = coords[i][1] + dz*n[1];
+      
+      cp[i][2] = coords[i+1][0] + dz*n[0];
+      cp[i][3] = coords[i+1][1] + dz*n[1];
+      
+      noFill();
+      stroke(0,0,0);
+        
+      bezier(coords[i][0], coords[i][1], cp[i][0], cp[i][1], cp[i][2], cp[i][3], coords[i+1][0], coords[i+1][1]);
+    }
+    
+    // last curve
+    dz = vops.distance(coords[i][0], coords[i][1], coords[0][0], coords[0][1])*0.2;
+    n = vops.normal(coords[i][0], coords[i][1], coords[0][0], coords[0][1]);
+      
+      cp[i][0] = coords[i][0] + dz*n[0];
+      cp[i][1] = coords[i][1] + dz*n[1];
+      
+      cp[i][2] = coords[0][0] + dz*n[0];
+      cp[i][3] = coords[0][1] + dz*n[1];
+      
+      noFill();
+      stroke(0,0,0);
+        
+      bezier(coords[i][0], coords[i][1], cp[i][0], cp[i][1], cp[i][2], cp[i][3], coords[0][0], coords[0][1]);
+    
+  }
+  
   void makePetals(float[][] coords, int corners) {
-    println("coords lenght: ",coords.length);
 
     float[] temp;
-    println(coords[0][0], coords[0][1], coords[1][0], coords[1][1]);
+    float d;
+    float[] c, n;
+    VOps vops = new VOps(); // vector operations
+    c = new float[4];
     
-    pet = new Petal(coords[0][0], coords[0][1], coords[1][0], coords[1][1]);
-    
+    pet = new Petal(coords[0][0], coords[0][1], coords[1][0], coords[1][1]);  
     temp = pet.getTip();
-    println(temp[0]);
+    c = pet.getControls();
+
     petalPoints[0][0] = temp[0];
     petalPoints[0][1] = temp[1];
+    noFill();
+    stroke(0,0,0);
+    //bezier(coords[0][0], coords[0][1], c[0]+random(0,5), c[1]+random(0,5), c[2]+random(0,5), c[3]+random(0,5), coords[1][0], coords[1][1]);
+    
+    
     
     for (int i = 1; i < corners; i++) {
-      println(i);
-      println(coords[i][0], coords[i][1], coords[0][0], coords[0][1]);
       pet = new Petal(coords[i-1][0], coords[i-1][1], coords[i][0], coords[i][1]);
       temp = pet.getTip();
-      println(temp[0]);
+      c = pet.getControls();
       petalPoints[i][0] = temp[0];
       petalPoints[i][1] = temp[1];
+      bezier(coords[i-1][0], coords[i-1][1], c[0]+random(0,5), c[1]+random(0,5), c[2]+random(0,5), c[3]+random(0,5), coords[i][0], coords[i][1]);
     }
-    println(i);
-    println(coords[i-1][0], coords[i-1][1], coords[0][0], coords[0][1]);
+
     pet = new Petal(coords[i-1][0], coords[i-1][1], coords[0][0], coords[0][1]);
     
     temp = pet.getTip();
-    println("last one: ", temp[0]);
+    c = pet.getControls();
+    
     petalPoints[i][0] = temp[0];
     petalPoints[i][1] = temp[1];
+    bezier(coords[i-1][0], coords[i-1][1], c[0]+random(0,5), c[1]+random(0,5), c[2]+random(0,5), c[3]+random(0,5), coords[0][0], coords[0][1]);
     
   }
 
@@ -226,8 +289,8 @@ class Centre {
     stroke(1);
     fill(i*2);
 
-    ellipse(coords[0][0],coords[0][1],4,4);
-    ellipse(petalPoints[0][0], petalPoints[0][1], 1,1);
+    //ellipse(coords[0][0],coords[0][1],4,4);
+    //ellipse(petalPoints[0][0], petalPoints[0][1], 1,1);
     
     for (i=1;i<corners;i++) {
       angle = i * TWO_PI/float(corners);
@@ -238,13 +301,13 @@ class Centre {
       x2 = coords[i][0];
       y2 = coords[i][1];
 
-      line(x1,y1,x2,y2);
-      ellipse(x2,y2,2,2);
+      //line(x1,y1,x2,y2);
+      //ellipse(x2,y2,2,2);
       
-      ellipse(petalPoints[i][0], petalPoints[i][1], i,i);
+      //ellipse(petalPoints[i][0], petalPoints[i][1], i,i);
 
-      line(x1,y1,petalPoints[i][0],petalPoints[i][1]);
-      line(x2,y2,petalPoints[i][0],petalPoints[i][1]);
+      //line(x1,y1,petalPoints[i][0],petalPoints[i][1]);
+      //line(x2,y2,petalPoints[i][0],petalPoints[i][1]);
 
     }
     
@@ -254,11 +317,11 @@ class Centre {
     x2 = coords[0][0];
     y2 = coords[0][1];
       
-    line(x1,y1,x2,y2);
-    ellipse(petalPoints[i][0], petalPoints[i][1], 1,2);
+    //line(x1,y1,x2,y2);
+    //ellipse(petalPoints[i][0], petalPoints[i][1], 1,2);
     
-    line(x1,y1,petalPoints[i][0],petalPoints[i][1]);
-    line(x2,y2,petalPoints[i][0],petalPoints[i][1]);
+    //line(x1,y1,petalPoints[i][0],petalPoints[i][1]);
+    //line(x2,y2,petalPoints[i][0],petalPoints[i][1]);
 
 
   }
@@ -281,6 +344,8 @@ class Petal {
   float[] foo = new float[2];
   float len;
   float[] tipCoords = new float[2];
+  float[] cp = new float[4];
+  float[] c = new float[4];
   
 
   Petal(float x1, float y1, float x2, float y2) {
@@ -304,27 +369,38 @@ class Petal {
      //println("normals: ", foo[0], foo[1]);
      
      this.setTip(coords[2][0]+foo[0]*len,coords[2][1]+foo[1 ]*len);
-
-
+     
+     c[0] = coords[0][0]+foo[0]*len;
+     c[1] = coords[0][1]+foo[1]*len;
+     c[2] = coords[1][0]+foo[0]*len;
+     c[3] = coords[1][1]+foo[1]*len;
+     this.setControls(c);
+     
   }
   
   void setTip(float x, float y) {
-    println("setting tip at ", x,y);
+    //println("setting tip at ", x,y);
     this.tipCoords[0] = x;
     this.tipCoords[1] = y;
+  }
+  
+  void setControls(float[] c) {
+    this.cp[0] = c[0];
+    this.cp[1] = c[1];
+    this.cp[2] = c[2];
+    this.cp[3] = c[3];
   }
   
   float[] getTip() {
     return this.tipCoords;
   }
+  
+  float[] getControls() {
+    return this.cp;
+  }
 
   void display() {
-    stroke(1);
-    fill(color(0,255,0));
-    //ellipse(coords[2][0],coords[2][1],2,4);
-    //ellipse(coords[2][0]+foo[0]*len,coords[2][1]+foo[1]*len,4,2);
 
-    //line(coords[0][0],coords[0][1], coords[2][0]+foo[0]*len,coords[2][1]+foo[1 ]*len);
   }
 
   float[] normal(float x1, float y1, float x2, float y2) {
@@ -333,8 +409,7 @@ class Petal {
     float dy = y2 - y1;
     
     float len = sqrt(dx*dx + dy*dy);
-    //foo[0] = (-1.0*dy)/len;
-    //foo[1] = (dx)/len;
+
     foo[0] = (-1.0*dy)/len;
     foo[1] = (dx)/len;
     return foo;
@@ -403,4 +478,36 @@ class Flower {
   }
 
 
+}
+
+// 2D Maths
+class VOps {
+  //float[] x1,x2,x3,x4,x5,x6; // coordinate placeholders
+  
+  VOps() {
+    
+  }
+  
+  // normal to given vector (right handed)
+  float[] normal(float x1, float y1, float x2, float y2) {
+    float[] foo = new float[2];
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    
+    float len = sqrt(dx*dx + dy*dy);
+    foo[0] = (-1.0*dy)/len;
+    foo[1] = (dx)/len;
+    return foo;
+  }
+  
+  // distance between two points (2D)
+  float distance(float x1, float y1, float x2, float y2) {
+    float foo;
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    
+    foo = sqrt(dx*dx + dy*dy);
+    return foo;
+  }
+  
 }
