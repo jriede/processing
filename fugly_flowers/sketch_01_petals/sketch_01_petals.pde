@@ -1,6 +1,8 @@
 
 Flower[] flowers;
 
+float sizex = 500;
+float div = 10;
 
 int corners_min = 5;
 int corners_max = 8;
@@ -27,12 +29,17 @@ void mouseClicked()
 {
   
   //println(i);
-  flowers[i] = new Flower(mouseX,mouseY);
-  flowers[i].display();
+  background(255);
+  for (i=0; i<=sizex+10; i+=sizex/div) {
+    flowers[i] = new Flower(int(i + random(-10,10)), 350);
+    flowers[i].display();
   
-  i += 1;
+  }
 
-  //saveFrame("yayflowers-###.png");
+}
+
+void keyPressed() {
+  saveFrame("petals-###.png");
 }
 
 class Stem {
