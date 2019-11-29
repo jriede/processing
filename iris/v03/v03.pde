@@ -5,7 +5,7 @@ float rad;
 float lastx = -999;
 float lasty = -999;
 int i; // ellipse index
-int maxElls = 1000;
+int maxElls = 8000;
 color col;
 
 void setup() {
@@ -14,22 +14,38 @@ void setup() {
   background(255);
   strokeWeight(0.5);
   smooth(3);
+  noFill();
   noLoop();
   i = 0;
   els = new Ell[maxElls];  
 }
 
 void draw() {
-  float tx, ty, tr;
+  float tx, ty, tr, j;
 
-  for (i = 0; i < 360; i += 20) {
-    tx = 100*sin(radians(i));
-    ty = 100*cos(radians(i));
-    tr = (float) i;
-    col = color(random(255),0,255, random(200));
+
+  for (i = 0; i < 10*360; i += 20) { // ellipses
+    j = (float) i + random(10);
     
-    els[i] = new Ell(20, col, tx, ty, tr);
+    tx = 150*sin(radians(j));
+    ty = 150*cos(radians(j));
+    tr = j;
+    col = color(random(255),random(40),255, random(200,255));
     
+    els[i] = new Ell(200, col, tx, ty, tr);
+    
+    els[i].display();
+    i += 1;
+  }
+  
+  for (i = 0; i < 2*360; i += 5) { // outer circles
+    col = color(0,0,0,random(100,255));
+    j = (float) i + random(10);
+    tr = j;
+    tx = 250*sin(radians(j));
+    ty = 250*cos(radians(j));
+    
+    els[i] = new Ell(30, col, tx, ty, tr);
     els[i].display();
     i += 1;
   }
@@ -64,7 +80,7 @@ class Ell {
     pushMatrix();
     translate(centX+txx, centY+tyy);
     rotate(radians(90-trr));
-    ellipse(0,0,150,20);
+    ellipse(0,0,r,20+random(20));
     
     /*
     for (t = 0; t <= 2*PI; t += PI/100) {
